@@ -1,0 +1,18 @@
+{
+  "name": "passionate-people-applied-ai-engineering-workshop",
+  "version": "1.0.0",
+  "description": "A repository containing the code and tutorials for the Passionate People workshop \"Applied AI Engineering\"",
+  "type": "module",
+  "scripts": {
+    "ai": "npx jiti ./main.ts",
+    "env": "node --env-file=.env main.ts"
+  },
+  "author": "Patrick van Everdingen",
+  "license": "ISC",
+  "dependencies": {
+    "@ai-sdk/openai": "^1.0.3",
+    "ai": "^4.0.2",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  }
+}
