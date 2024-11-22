@@ -11,6 +11,9 @@ import { calculateLLMCost, type TokenUsage } from './utils';
 const recipeSchema = z.object({
   recipe: z.object({
     name: z.string().describe('Name of the recipe'),
+    description: z
+      .string()
+      .describe('Description of the recipe in 2-3 sentences.'),
     servings: z
       .number()
       .describe('Number of people the recipe serves'),
@@ -66,6 +69,7 @@ const prompt = `Pasta pesto alla Genovese for 4 persons`;
 const system = `
     You are an expert chef who has worked at a Michelin restaurant for more than 20 years. 
     You must create recipes for dishes that the user gives you. Ensure to list equipment, ingredients and cooking time.
+    Also ensure to create a description for the recipe in 2-3 sentences, which tells the background and history of the dish.
 
     The user will indicate how many persons will be eating the dish. Adjust the ingredients based on this.
 `;
