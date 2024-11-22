@@ -1,13 +1,66 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { generateText, streamText } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { generateObject } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
 
-const prompt = `
-    Lasagna for 4 persons.
-`;
+// Define schema for recipe data
+const recipeSchema = z.object({
+  recipe: z.object({
+    name: z.string().describe('Name of the recipe'),
+    servings: z
+      .number()
+      .describe('Number of people the recipe serves'),
+    equipment: z
+      .array(z.string())
+      .describe('List of kitchen equipment needed'),
+    ingredients: z
+      .array(
+        z.object({
+          item: z.string().describe('Name of the ingredient'),
+          amount: z.number().describe('Quantity of the ingredient'),
+          unit: z
+            .enum([
+              'cup',
+              'cups',
+              'tablespoon',
+              'tablespoons',
+              'teaspoon',
+              'teaspoons',
+              'gram',
+              'grams',
+              'kilogram',
+              'kilograms',
+              'milliliter',
+              'milliliters',
+              'liter',
+              'liters',
+              'ounce',
+              'ounces',
+              'pound',
+              'pounds',
+              'pinch',
+              'dash',
+            ])
+            .or(z.literal('pieces'))
+            .or(z.literal('teaspoons'))
+            .optional()
+            .describe('Unit of measurement for the ingredient'),
+        })
+      )
+      .describe('List of ingredients with their quantities'),
+    steps: z
+      .array(z.string())
+      .describe('Step-by-step cooking instructions'),
+    totalTime: z.number().describe('Total cooking time in minutes'),
+  }),
+});
+
+type Recipe = z.infer<typeof recipeSchema>;
+
+const prompt = `Pasta pesto alla Genovese for 4 persons`;
 
 const system = `
     You are an expert chef who has worked at a Michelin restaurant for more than 20 years. 
@@ -17,31 +70,16 @@ const system = `
 `;
 
 async function createRecipe() {
-  // Generate the recipe and wait for entire response
-  const { text } = await generateText({
-    model: anthropic('claude-3-5-sonnet-latest'),
-    topP: 1,
-    system,
-    prompt,
-  });
+  const { object: recipe }: { object: Recipe } = await generateObject(
+    {
+      model: openai('gpt-4o-mini'),
+      schema: recipeSchema,
+      system,
+      prompt,
+    }
+  );
 
-  console.log(text);
-
-  // Generate the recipe and stream the generated tokens on the fly
-  const result = await streamText({
-    model: openai('gpt-4o-mini'),
-    temperature: 1,
-    system,
-    prompt,
-  });
-
-  // result.textStream is both a ReadableStream and an AsyncIterable
-  for await (const chunk of result.textStream) {
-    console.log(chunk);
-  }
+  console.dir(recipe, { depth: null });
 }
 
 createRecipe();
-
-// For an overview of Vercel AI SDK models, providers, compatibilities and capabilities:
-// https://sdk.vercel.ai/docs/foundations/providers-and-models
