@@ -5,6 +5,7 @@ import { generateObject } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
+import { calculateLLMCost, type TokenUsage } from './utils';
 
 // Define schema for recipe data
 const recipeSchema = z.object({
@@ -70,16 +71,19 @@ const system = `
 `;
 
 async function createRecipe() {
-  const { object: recipe }: { object: Recipe } = await generateObject(
-    {
-      model: openai('gpt-4o-mini'),
-      schema: recipeSchema,
-      system,
-      prompt,
-    }
-  );
+  const {
+    object: recipe,
+    usage,
+  }: { object: Recipe; usage: TokenUsage } = await generateObject({
+    model: openai('gpt-4o-mini'),
+    schema: recipeSchema,
+    system,
+    prompt,
+  });
 
   console.dir(recipe, { depth: null });
+  console.dir(usage, { depth: null });
+  calculateLLMCost('OPEN_AI', usage);
 }
 
 createRecipe();
