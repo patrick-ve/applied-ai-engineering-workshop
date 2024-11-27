@@ -5,13 +5,16 @@
   "type": "module",
   "scripts": {
     "ai": "npx jiti ./main.ts",
-    "env": "node --env-file=.env main.ts"
+    "migrate:db": "npx jiti ./migrate.ts"
   },
   "author": "Patrick van Everdingen",
   "license": "ISC",
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.2",
     "@ai-sdk/openai": "^1.0.3",
+    "@electric-sql/pglite": "^0.2.14",
+    "@huggingface/transformers": "^3.0.2",
+    "@tensorflow/tfjs": "^4.22.0",
     "ai": "^4.0.2",
     "dotenv": "^16.4.5",
     "zod": "^3.23.8"
