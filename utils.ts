@@ -1,3 +1,5 @@
+import { initDb, initSchema } from './db';
+
 export interface TokenUsage {
   promptTokens: number;
   completionTokens: number;
@@ -34,3 +36,10 @@ export function calculateLLMCost(
     )}`
   );
 }
+
+async function initializeDatabase() {
+  const db = await initDb();
+  await initSchema(db);
+}
+
+initializeDatabase();
