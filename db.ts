@@ -28,11 +28,11 @@ export const initSchema = async (db) => {
       name TEXT NOT NULL,
       description TEXT NOT NULL,
       servings INTEGER NOT NULL,
-      equipment TEXT,     -- Stored as JSON string
-      ingredients TEXT,   -- Stored as JSON string
-      steps TEXT,         -- Stored as JSON string
+      equipment JSONB,
+      ingredients JSONB,
+      steps JSONB,
       totalTime INTEGER NOT NULL,
-      embedding vector(384)
+      embedding vector(768)
     );
 
     CREATE INDEX IF NOT EXISTS recipes_embedding_idx ON recipes USING ivfflat (embedding);
