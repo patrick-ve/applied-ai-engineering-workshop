@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "ai": "npx jiti ./main.ts",
-    "migrate:db": "npx jiti ./migrate.ts"
+    "seed:db": "npx jiti ./db/seed.ts"
   },
   "author": "Patrick van Everdingen",
   "license": "ISC",
