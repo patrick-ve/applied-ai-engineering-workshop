@@ -1,6 +1,6 @@
 import { pipeline, Tensor } from '@huggingface/transformers';
 
-const modelName = 'sentence-transformers/all-MiniLM-L6-v2';
+const modelName = 'nomic-ai/nomic-embed-text-v1';
 
 let featureExtractor;
 
