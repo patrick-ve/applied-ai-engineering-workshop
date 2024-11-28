@@ -5,8 +5,8 @@ import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 import { type TokenUsage } from './utils';
-import { initDb, initSchema } from './db';
-import { generateEmbeddings } from './generateEmbeddings';
+import { initDb, initSchema } from './db/db';
+import { generateEmbeddings } from './db/embeddings';
 
 const recipeSchema = z.object({
   name: z.string().describe('Name of the recipe'),
@@ -56,19 +56,12 @@ async function createRecipe(db, recipeInput: string) {
 
   console.dir(recipe, { depth: null });
 
-  const { name, description, ingredients } = recipe;
-
-  // Generate embedding for the recipe description
-  const embeddingArray = await generateEmbeddings(
-    `${name} ${description} ${ingredients
-      .map((ingredient) => ingredient.item)
-      .join(' ')}`
-  );
+  const recipeText = `Recipe: ${recipe.name}. Description: ${recipe.description}`;
+  const embeddingArray = await generateEmbeddings(recipeText);
 
   // Convert the embedding array to a Postgres vector literal
   const embeddingVector = `[${embeddingArray.join(',')}]`;
 
-  // Save the recipe and embedding to the database
   await db.query(
     `
     INSERT INTO recipes (name, description, servings, equipment, ingredients, steps, totalTime, embedding)
@@ -78,32 +71,13 @@ async function createRecipe(db, recipeInput: string) {
       recipe.name,
       recipe.description,
       recipe.servings,
-      JSON.stringify(recipe.equipment),
-      JSON.stringify(recipe.ingredients),
-      JSON.stringify(recipe.steps),
+      recipe.equipment,
+      recipe.ingredients,
+      recipe.steps,
       recipe.totalTime,
       embeddingVector,
     ]
   );
-}
-
-// Read recipes from dataabase
-async function readRecipes(db) {
-  const result = await db.query(`
-    SELECT 
-      id,
-      name, 
-      description,
-      servings,
-      equipment,
-      ingredients,
-      steps,
-      totalTime,
-      embedding
-    FROM recipes;
-  `);
-
-  console.log(result);
 }
 
 async function queryRecipes(db, query: string, limit = 5) {
@@ -116,11 +90,9 @@ async function queryRecipes(db, query: string, limit = 5) {
   const res = await db.query(
     `
     SELECT 
-      id, 
       name, 
-      description, 
+      description,
       ingredients,
-      steps,
       -(embedding <#> ${queryEmbeddingVector}) AS similarity
     FROM recipes
     ORDER BY similarity DESC
@@ -129,40 +101,16 @@ async function queryRecipes(db, query: string, limit = 5) {
     [limit]
   );
 
-  console.log(res.rows);
+  console.dir(res.rows, { depth: null });
 
   return res.rows;
 }
-
-const recipes = [
-  'Butter chicken for 2 persons',
-  'Chicken madras for 4 persons',
-  'Chicken vindaloo for 2 persons',
-  'Pasta pesto for 2 persons',
-  'Pasta carbonara for 2 persons',
-  'Pasta alla Gricia for 2 persons',
-  'Paella valenciana for 6 persons',
-  'Gazpacho for 4 persons',
-  'Tortilla española for 4 persons',
-  'Patatas bravas for 4 persons',
-  'Coq au vin for 4 persons',
-  'Beef bourguignon for 6 persons',
-  'Ratatouille for 4 persons',
-  'Cassoulet for 6 persons',
-  'Bouillabaisse for 4 persons',
-  'Albondigas en salsa for 4 persons',
-];
 
 async function main() {
   const db = await initDb();
   await initSchema(db);
 
-  // for (const recipe of recipes) {
-  //   await createRecipe(db, recipe);
-  // }
-
-  // await readRecipes(db);
-  await queryRecipes(db, 'Potatoes', 3);
+  await queryRecipes(db, 'Spicy food', 3);
 }
 
 main();
