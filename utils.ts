@@ -1,4 +1,4 @@
-import { initDb, initSchema } from './db';
+import { initDb, initSchema } from './db/db';
 
 export interface TokenUsage {
   promptTokens: number;
