@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { openai } from '@ai-sdk/openai';
+import { ollama } from 'ollama-ai-provider';
 import { pipeline, Tensor } from '@huggingface/transformers';
 import { generateObject } from 'ai';
 import { Recipe, recipeSchema } from '../models/recipe';
@@ -77,7 +77,7 @@ export async function createRecipe(db, recipeInput: string) {
 
   const { object: recipe }: { object: Recipe; usage: TokenUsage } =
     await generateObject({
-      model: openai('gpt-4o-mini'),
+      model: ollama('llama3.1:8b'),
       schema: recipeSchema,
       system: systemPrompt,
       prompt: recipeInput,
@@ -148,14 +148,14 @@ export async function queryDatabase(db, input: string) {
   `;
 
   const { object }: { object: Query } = await generateObject({
-    model: openai('gpt-4o-mini'),
+    model: ollama('llama3.1:8b'),
     system: systemPrompt,
     prompt: `Generate the query necessary to retrieve the data the user wants: ${input}`,
     schema: querySchema,
   });
 
   const queryWithNormalizedSpaces = object.query.replace(/\s+/g, ' ');
-  console.log(queryWithNormalizedSpaces);
+  console.log(`query`, queryWithNormalizedSpaces);
 
   const { rows } = await db.query(queryWithNormalizedSpaces);
   console.log('\nQuery results:');
