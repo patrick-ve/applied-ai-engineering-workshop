@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { initDb, initSchema } from './db';
+import { initDb, initSchema } from '.';
 
 const seedDb = async () => {
   const db = await initDb();

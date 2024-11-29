@@ -4,8 +4,8 @@
   "description": "A repository containing the code and tutorials for the Passionate People workshop \"Applied AI Engineering\"",
   "type": "module",
   "scripts": {
-    "ai": "npx jiti ./main.ts",
-    "seed:db": "npx jiti ./db/seed.ts"
+    "ai": "npx jiti ./src/main.ts",
+    "seed:db": "npx jiti ./src/db/seed.ts"
   },
   "author": "Patrick van Everdingen",
   "license": "ISC",

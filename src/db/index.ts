@@ -3,7 +3,7 @@ import { vector } from '@electric-sql/pglite/vector';
 
 let dbInstance;
 
-export const initDb = async () => {
+export async function initDb() {
   if (dbInstance) {
     return dbInstance;
   }
@@ -17,9 +17,9 @@ export const initDb = async () => {
 
   dbInstance = db;
   return db as PGlite;
-};
+}
 
-export const initSchema = async (db) => {
+export async function initSchema(db) {
   await db.exec(`
     CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -37,4 +37,4 @@ export const initSchema = async (db) => {
 
     CREATE INDEX IF NOT EXISTS recipes_embedding_idx ON recipes USING ivfflat (embedding);
   `);
-};
+}
