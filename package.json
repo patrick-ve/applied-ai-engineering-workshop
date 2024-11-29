@@ -17,6 +17,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "ai": "^4.0.2",
     "dotenv": "^16.4.5",
+    "ollama-ai-provider": "^1.0.0",
     "zod": "^3.23.8"
   }
 }
