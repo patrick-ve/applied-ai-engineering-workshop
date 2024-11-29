@@ -1,7 +1,7 @@
 # Applied AI Development for TypeScript Engineers Workshop
 
-**Duration:** 2.5 hours
-**Prerequisites:** TypeScript, Node.js fundamentals
+- **Duration:** 2.5 hours
+- **Prerequisites:** TypeScript, Node.js fundamentals
 
 ## Workshop Overview
 
