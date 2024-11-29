@@ -5,6 +5,10 @@ import { initDb } from './db';
   const db = await initDb();
   await queryDatabase(
     db,
-    'Recipes with a cooking time under 45 minutes and fewer than 7 ingredients. Also list the ingredients for each recipe.'
+    `
+      I am in need of a recipe that is done in less than 35 minutes. 
+      Also I only want to use fewer than 8 ingredients.
+      Show me the recipe ingredients, name, description and cooking time.
+    `
   );
 })();
