@@ -5,6 +5,7 @@ import { openai } from '@ai-sdk/openai';
 import { pipeline, Tensor } from '@huggingface/transformers';
 import { generateObject } from 'ai';
 import { Recipe, recipeSchema } from '../models/recipe';
+import { Query, querySchema } from '../models/query';
 
 export interface TokenUsage {
   promptTokens: number;
@@ -107,7 +108,56 @@ export async function createRecipe(db, recipeInput: string) {
     ]
   );
 }
+
 export async function logRecipes(db) {
   const { rows } = await db.query('SELECT * FROM recipes');
+  console.dir(rows, { depth: null });
+}
+
+export async function queryDatabase(db, input: string) {
+  const systemPrompt = `
+    You are a SQL (Postgres) and data visualization expert. Your job is to help the user write a SQL query to retrieve the data they need. The table schema is as follows:
+
+    recipes (
+      id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      servings INTEGER NOT NULL,
+      equipment JSONB,
+      ingredients JSONB,
+      steps JSONB,
+      totalTime INTEGER NOT NULL,
+      embedding vector(768)
+    );
+    
+    Only retrieval queries are allowed.
+    
+    For text fields like name and description, use the ILIKE operator and convert both the search term and the field to lowercase using LOWER() function. For example: LOWER(name) ILIKE LOWER('%search_term%').
+
+    For JSONB arrays (equipment, ingredients, steps), use the jsonb_array_elements function to search within arrays. For example:
+    SELECT * FROM recipes, jsonb_array_elements(ingredients) as ingredient 
+    WHERE ingredient->>'name' ILIKE '%search_term%'
+    
+    The embedding field can be used for similarity search using the <-> operator (cosine distance).
+    For example: SELECT * FROM recipes ORDER BY embedding <-> query_embedding LIMIT 5
+    
+    Note: totalTime is in minutes
+    Note: when searching for cooking times, consider grouping into categories like "quick" (< 30 mins), "medium" (30-60 mins), "long" (> 60 mins)
+    
+    EVERY QUERY SHOULD RETURN QUANTITATIVE DATA THAT CAN BE PLOTTED ON A CHART! There should always be at least two columns. If the user asks for a single column, return the column and the count of the column. For example, if they ask about cooking times, return both the time category and the count of recipes in that category.
+  `;
+
+  const { object }: { object: Query } = await generateObject({
+    model: openai('gpt-4o-mini'),
+    system: systemPrompt,
+    prompt: `Generate the query necessary to retrieve the data the user wants: ${input}`,
+    schema: querySchema,
+  });
+
+  const queryWithNormalizedSpaces = object.query.replace(/\s+/g, ' ');
+  console.log(queryWithNormalizedSpaces);
+
+  const { rows } = await db.query(queryWithNormalizedSpaces);
+  console.log('\nQuery results:');
   console.dir(rows, { depth: null });
 }
