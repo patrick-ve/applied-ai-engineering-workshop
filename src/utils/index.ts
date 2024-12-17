@@ -119,7 +119,7 @@ export async function queryRecipes(db, query: string, limit = 3) {
   const queryEmbeddingVector = `'[${queryEmbeddingArray.join(',')}]'`;
 
   // Perform the similarity search using the "<->" operator for Euclidean distance or "<#>" for cosine distance
-  const res = await db.query(
+  const { rows } = await db.query(
     `
     SELECT 
       name, 
@@ -132,7 +132,7 @@ export async function queryRecipes(db, query: string, limit = 3) {
     [limit]
   );
 
-  console.dir(res.rows, { depth: null });
+  console.dir(rows, { depth: null });
 
-  return res.rows;
+  return rows;
 }
