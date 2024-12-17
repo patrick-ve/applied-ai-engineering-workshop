@@ -111,3 +111,28 @@ export async function logRecipes(db) {
   const { rows } = await db.query('SELECT * FROM recipes');
   console.dir(rows, { depth: null });
 }
+
+export async function queryRecipes(db, query: string, limit = 3) {
+  const queryEmbeddingArray = await generateEmbeddings(query);
+
+  // Convert the embedding array to a Postgres vector literal
+  const queryEmbeddingVector = `'[${queryEmbeddingArray.join(',')}]'`;
+
+  // Perform the similarity search using the "<->" operator for Euclidean distance or "<#>" for cosine distance
+  const res = await db.query(
+    `
+    SELECT 
+      name, 
+      description,
+      -(embedding <#> ${queryEmbeddingVector}) AS similarity
+    FROM recipes
+    ORDER BY similarity DESC
+    LIMIT $1;
+    `,
+    [limit]
+  );
+
+  console.dir(res.rows, { depth: null });
+
+  return res.rows;
+}

@@ -1,9 +1,8 @@
-import { createRecipe, logRecipes } from './utils';
+import { queryRecipes } from './utils';
 import { initDb } from './db';
 
 (async () => {
   const db = await initDb();
 
-  await createRecipe(db, 'Stamppot Boerenkool for 4 persons');
-  await logRecipes(db);
+  await queryRecipes(db, 'Few ingredients');
 })();
