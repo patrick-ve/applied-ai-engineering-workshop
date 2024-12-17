@@ -50,19 +50,24 @@ export async function generateEmbeddings(
 ): Promise<number[]> {
   let featureExtractor;
 
-  if (!featureExtractor) {
-    featureExtractor = await pipeline(
-      'feature-extraction',
-      modelName
-    );
+  try {
+    if (!featureExtractor) {
+      featureExtractor = await pipeline(
+        'feature-extraction',
+        modelName
+      );
+    }
+
+    const embeddings: Tensor = await featureExtractor(text, {
+      pooling: 'mean',
+      normalize: true,
+    });
+
+    return Array.from(embeddings.ort_tensor.cpuData);
+  } catch (error) {
+    console.error('Error generating embeddings:', error);
+    throw error;
   }
-
-  const embeddings: Tensor = await featureExtractor(text, {
-    pooling: 'mean',
-    normalize: true,
-  });
-
-  return Array.from(embeddings.ort_tensor.cpuData);
 }
 
 export async function createRecipe(db, recipeInput: string) {
